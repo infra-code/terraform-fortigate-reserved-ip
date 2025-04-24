@@ -1,0 +1,64 @@
+name: Terraform CI
+
+on:
+  # Ensure build works in a pull request
+  pull_request:
+
+  # Allow pushes to main to trigger
+  push:
+    branches: [main]
+
+# Sets up concurrency to ensure that only one job or workflow using the same concurrency group will run at a time.
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: "Runs best practices"
+
+    # Specify the job to run on the latest Ubuntu version
+    runs-on: ubuntu-latest
+
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # https://github.com/opentofu/setup-opentofu
+      - name: Install tofu
+        uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.05
+
+      - name: Check terraform format
+        run: |
+          if [[ -n "$(tofu fmt -check -recursive -diff)" ]]; then
+            echo "Some terraform files need to be formatted. Run 'tofu fmt -recursive' to fix them.";
+            exit 1;
+          fi
+
+      - name: Initialize Terraform
+        run: tofu init
+
+      - name: Validate terraform files
+        run: tofu validate
+
+  test:
+    name: "Runs unit tests"
+
+    # Specify the job to run on the latest Ubuntu version
+    runs-on: ubuntu-latest
+
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # https://github.com/opentofu/setup-opentofu
+      - name: Install tofu
+        uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.05
+
+      - name: Initialize Terraform
+        run: tofu init
+
+      - name: Run unit tests
+        run: tofu test
