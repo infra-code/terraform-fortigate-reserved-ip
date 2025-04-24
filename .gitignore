@@ -1,0 +1,30 @@
+### Terraform ###
+
+# Local .terraform directories
+**/.terraform/*
+**/.terraform*
+
+# Ignore test data
+**/.test-data/*
+.terraform.lock.hcl
+**/*.tfplan
+**/backend.tf
+.terraform
+plan
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Scripts
+*.sh
+
+# Crash log files
+crash.log
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
